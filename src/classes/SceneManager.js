@@ -26,6 +26,8 @@ export class SceneManager {
     this.rotationEnabled = true;
     this.rotationAngle = 0;
     this.cameraRadius = CONFIG.SCENE.CAMERA_RADIUS;
+    this.issMarker = null; // Référence pour l'animation
+    this.lastTime = 0;
 
     this.initialize().then(() => {
       console.log("Scene manager initialized");
@@ -194,16 +196,24 @@ export class SceneManager {
       console.log("Animation stopped");
     }
   }
-
   /**
    * Update animation frame
    */
   updateAnimation() {
+    const currentTime = performance.now();
+    const deltaTime = currentTime - this.lastTime;
+    this.lastTime = currentTime;
+
     if (this.rotationEnabled) {
       this.rotationAngle += CONFIG.SCENE.ROTATION_SPEED;
       this.camera.position.x = this.cameraRadius * Math.sin(this.rotationAngle);
       this.camera.position.z = this.cameraRadius * Math.cos(this.rotationAngle);
       this.camera.lookAt(this.earth.position);
+    }
+
+    // Animer le marqueur ISS s'il existe
+    if (this.issMarker) {
+      this.issMarker.animate(deltaTime);
     }
 
     if (this.controls) {
@@ -227,6 +237,14 @@ export class SceneManager {
   setRotationEnabled(enabled) {
     this.rotationEnabled = enabled;
     console.log(`Camera rotation ${enabled ? "enabled" : "disabled"}`);
+  }
+
+  /**
+   * Set ISS marker reference for animation
+   * @param {ISSMarker} issMarker - The ISS marker instance
+   */
+  setISSMarker(issMarker) {
+    this.issMarker = issMarker;
   }
 
   /**

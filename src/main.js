@@ -32,10 +32,14 @@ class ISSTrackerApp {
         throw new Error("Canvas element not found");
       }
 
-      this.sceneManager = new SceneManager(canvas);
-
-      // Initialize ISS marker
+      this.sceneManager = new SceneManager(canvas); // Initialize ISS marker
       this.issMarker = new ISSMarker(this.sceneManager.getScene());
+
+      // Connect ISS marker to scene manager for animation
+      this.sceneManager.setISSMarker(this.issMarker);
+
+      // Wait for ISS marker to load before proceeding
+      await this.issMarker.waitForLoad();
 
       // Initialize position service
       this.positionService = new ISSPositionService();

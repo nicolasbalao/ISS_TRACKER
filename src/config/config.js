@@ -22,6 +22,14 @@ export const CONFIG = {
     ISS_MARKER_RADIUS: 0.05,
   },
 
+  // ISS 3D Model Configuration
+  ISS_MODEL: {
+    PATH: "/ISS_stationary.glb",
+    SCALE: 0.001,
+    ROTATION_SPEED: 0.0005,
+    INITIAL_ROTATION: { x: Math.PI / 2, y: 0, z: 0 },
+  },
+
   // Visual Configuration
   VISUAL: {
     EARTH_SEGMENTS: 64,
