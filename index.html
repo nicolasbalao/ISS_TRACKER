@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>ISS Tracker 3D - Suivi en temps réel de la Station Spatiale Internationale</title>
+    <meta name="description"
+        content="Visualisez la position de la Station Spatiale Internationale en temps réel dans un environnement 3D interactif">
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="app-title">
+                <span class="iss-icon">🛰️</span>
+                ISS Tracker 3D
+            </h1>
+            <p class="app-description">Suivi en temps réel de la Station Spatiale Internationale</p>
+        </div>
+    </header>
+
+    <!-- Main 3D Canvas -->
+    <canvas id="scene" class="scene-canvas"></canvas>
+
+    <!-- Control Panel -->
+    <aside class="control-panel" id="controls-panel">
+        <div class="panel-header">
+            <h2>Contrôles</h2>
+        </div>
+
+        <div class="control-group">
+            <label class="toggle-control">
+                <input type="checkbox" id="rotation-toggle" checked>
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">Rotation automatique</span>
+            </label>
+        </div>
+    </aside>
+
+    <!-- Information Panel -->
+    <aside class="info-panel" id="coordinates-panel">
+        <div class="panel-header">
+            <h2>Position ISS</h2>
+            <div class="status-indicator" id="status-indicator"></div>
+        </div>
+
+        <div class="coordinates-display">
+            <div class="coordinate-item">
+                <span class="coordinate-label">Latitude :</span>
+                <span class="coordinate-value" id="latitude-display">--°--</span>
+            </div>
+            <div class="coordinate-item">
+                <span class="coordinate-label">Longitude :</span>
+                <span class="coordinate-value" id="longitude-display">--°--</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>À propos de l'ISS</h3>
+            <ul class="info-list">
+                <li>Altitude : ~408 km</li>
+                <li>Vitesse : ~27 600 km/h</li>
+                <li>Orbite : 90-93 minutes</li>
+                <li>Équipage : 3-6 astronautes</li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Chargement des données ISS...</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>Données fournies par <a href="http://open-notify.org/" target="_blank" rel="noopener">Open Notify API</a></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script defer src="src/main.js" type="module"></script>
+</body>
+
+</html>
