@@ -5,7 +5,7 @@ export const CONFIG = {
   // API Configuration
   API: {
     ISS_POSITION_URL: "http://api.open-notify.org/iss-now.json",
-    POLLING_INTERVAL: 60000, // 60 seconds
+    POLLING_INTERVAL: 10000, // 10 seconds
     TIMEOUT: 10000, // 10 seconds
   },
 
@@ -106,7 +106,8 @@ export const VALIDATORS = {
 
 // Environment detection
 export const ENVIRONMENT = {
-  isDevelopment: import.meta.env?.DEV || false,
+  // isDevelopment: import.meta.env?.DEV || false,
+  isDevelopment:  false,
   isProduction: import.meta.env?.PROD || false,
 
   // Browser capabilities
