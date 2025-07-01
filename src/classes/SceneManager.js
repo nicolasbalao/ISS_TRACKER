@@ -16,7 +16,7 @@ import {
   WebGLRenderer,
 } from "three";
 import { OrbitControls, RGBELoader } from "three/addons";
-import { CONFIG } from "../config/config.js";
+import {CONFIG, ENVIRONMENT} from "../config/config.js";
 import { getAllResources } from "../config/resources.js";
 import scene from "three/addons/offscreen/scene.js";
 import { Earth } from "./Earth.js";
@@ -94,8 +94,10 @@ export class SceneManager {
     this.createEarth();
 
     // Add helpers
-    const axesHelper = new AxesHelper(5);
-    this.scene.add(axesHelper);
+    if(ENVIRONMENT.isDevelopment) {
+      const axesHelper = new AxesHelper(5);
+      this.scene.add(axesHelper);
+    }
 
     this.isResourcesLoaded = true;
     console.log("Scene manager initialization completed");

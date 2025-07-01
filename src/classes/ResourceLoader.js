@@ -29,7 +29,6 @@ export class ResourceLoader {
    * @param {Function} callback - Callback function (progress, loadedCount, totalCount)
    */
   onProgress(callback) {
-    debugger;
     this.loadingCallbacks.push(callback);
   }
 
@@ -184,7 +183,6 @@ export class ResourceLoader {
    * Update loading progress and trigger callbacks
    */
   updateProgress() {
-    debugger;
     this.loadingProgress =
       this.totalResources > 0
         ? (this.loadedResources / this.totalResources) * 100
