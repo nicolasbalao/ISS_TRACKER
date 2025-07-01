@@ -47,6 +47,9 @@ export class SceneManager {
     await this.createEarth();
     this.createControls();
     this.setupEventListeners();
+
+    const axesHelper = new AxesHelper(5);
+    this.scene.add(axesHelper)
   }
 
   /**

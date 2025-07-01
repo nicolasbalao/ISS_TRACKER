@@ -18,7 +18,7 @@ export const CONFIG = {
     CAMERA_RADIUS: 3,
     ROTATION_SPEED: 0.001,
     EARTH_RADIUS: 1,
-    ISS_ORBIT_HEIGHT: 1.05,
+    ISS_ORBIT_HEIGHT: 1.1,
     ISS_MARKER_RADIUS: 0.05,
   },
 
