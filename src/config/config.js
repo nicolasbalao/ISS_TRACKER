@@ -4,7 +4,8 @@
 export const CONFIG = {
   // API Configuration
   API: {
-    ISS_POSITION_URL: "http://api.open-notify.org/iss-now.json",
+    // ISS_POSITION_URL: "http://api.open-notify.org/iss-now.json",
+    ISS_POSITION_URL: "https://api.wheretheiss.at/v1/satellites/25544",
     POLLING_INTERVAL: 10000, // 10 seconds
     TIMEOUT: 10000, // 10 seconds
   },
@@ -31,7 +32,7 @@ export const CONFIG = {
 
   // ISS 3D Model Configuration
   ISS_MODEL: {
-    PATH: "/ISS_stationary.glb",
+    PATH: "./ISS_stationary.glb",
     SCALE: 0.001,
     ROTATION_SPEED: 0.0003,
     INITIAL_ROTATION: { x: Math.PI / 2, y: 0, z: 0 },

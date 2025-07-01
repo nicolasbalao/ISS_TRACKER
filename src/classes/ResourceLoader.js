@@ -151,9 +151,10 @@ export class ResourceLoader {
    * @param {Object} options - Texture options
    */
   loadTexture(url, options = {}) {
+
     return new Promise((resolve, reject) => {
       this.textureLoader.load(
-        url,
+        earth,
         (texture) => {
           // Apply options to texture
           if (options.colorSpace) {

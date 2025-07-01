@@ -36,12 +36,12 @@ export class Earth {
 
     // Fallback to loading textures if not available
     if (!earthTexture) {
-      earthTexture = this.textureLoader.load("/earth.jpg");
+      earthTexture = this.textureLoader.load("./earth.jpg");
       earthTexture.colorSpace = SRGBColorSpace;
     }
 
     if (!bumpTexture) {
-      bumpTexture = this.textureLoader.load("/Bump.jpg");
+      bumpTexture = this.textureLoader.load("./Bump.jpg");
     }
 
     const geometry = new SphereGeometry(
@@ -70,7 +70,7 @@ export class Earth {
 
     // Fallback to loading texture if not available
     if (!cloudTexture) {
-      cloudTexture = this.textureLoader.load("/Clouds.png");
+      cloudTexture = this.textureLoader.load("./Clouds.png");
     }
 
     // Rayon légèrement plus grand que la Terre pour que les nuages apparaissent au-dessus

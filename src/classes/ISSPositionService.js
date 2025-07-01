@@ -22,8 +22,7 @@ export class ISSPositionService {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
-            const {latitude, longitude} = data.iss_position;
+            const {latitude, longitude} = await response.json();
 
             const position = {
                 lat: parseFloat(latitude),

@@ -10,13 +10,13 @@ export const RESOURCE_CONFIG = {
     {
       name: "hdr_environment",
       type: "hdr",
-      url: "/HDR_white_local_star.hdr",
+      url: "./HDR_white_local_star.hdr",
       description: "Environnement HDR principal",
     },
     {
       name: "hdr_planet",
       type: "hdr",
-      url: "/HDR_artificial_planet.hdr",
+      url: "./HDR_artificial_planet.hdr",
       description: "Environnement HDR planète artificielle",
       optional: true, // Optional resource - won't block loading if failed
     },
@@ -27,7 +27,7 @@ export const RESOURCE_CONFIG = {
     {
       name: "earth_diffuse",
       type: "texture",
-      url: "/earth.jpg",
+      url: "./ISS_TRACKER/earth.jpg",
       description: "Texture de la Terre",
       options: {
         colorSpace: SRGBColorSpace,
@@ -36,19 +36,19 @@ export const RESOURCE_CONFIG = {
     {
       name: "earth_bump",
       type: "texture",
-      url: "/Bump.jpg",
+      url: "./Bump.jpg",
       description: "Carte de relief de la Terre",
     },
     {
       name: "clouds_alpha",
       type: "texture",
-      url: "/Clouds.png",
+      url: "./Clouds.png",
       description: "Texture des nuages",
     },
     {
       name: "satellite_icon",
       type: "texture",
-      url: "/sattelite.png",
+      url: "./sattelite.png",
       description: "Icône satellite",
       optional: true,
     },
@@ -59,7 +59,7 @@ export const RESOURCE_CONFIG = {
     {
       name: "iss_station",
       type: "model",
-      url: "/ISS_stationary.glb",
+      url: "./ISS_stationary.glb",
       description: "Modèle 3D de l'ISS",
     },
   ],
