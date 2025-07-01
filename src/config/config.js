@@ -23,7 +23,8 @@ export const CONFIG = {
     ISS_GROUND_REFERENCE: {
       HEIGHT_OFFSET: 0.0005,
       COLOR: 0X00FFFF
-    }
+    },
+    CLOUDS_ROTATION_SPEED: 0.3
 
   },
 

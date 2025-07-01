@@ -1,16 +1,23 @@
 import {
-  AmbientLight, AxesHelper, Clock, DirectionalLight, FloatType,
+  AmbientLight,
+  AxesHelper,
+  Clock,
+  DirectionalLight,
+  FloatType,
   Mesh,
   MeshStandardMaterial,
-  PerspectiveCamera, PMREMGenerator,
+  PerspectiveCamera,
+  PMREMGenerator,
   Scene,
-  SphereGeometry, SRGBColorSpace,
+  SphereGeometry,
+  SRGBColorSpace,
   TextureLoader,
   WebGLRenderer,
 } from "three";
-import {OrbitControls, RGBELoader} from "three/addons";
+import { OrbitControls, RGBELoader } from "three/addons";
 import { CONFIG } from "../config/config.js";
 import scene from "three/addons/offscreen/scene.js";
+import { Earth } from "./Earth.js";
 
 /**
  * Class responsible for managing the 3D scene, camera, and renderer
@@ -23,13 +30,11 @@ export class SceneManager {
     this.renderer = null;
     this.controls = null;
     this.earth = null;
-    this.clouds = null;
     this.animationId = null;
     this.rotationEnabled = true;
     this.rotationAngle = 0;
     this.cameraRadius = CONFIG.SCENE.CAMERA_RADIUS;
     this.issMarker = null; // Référence pour l'animation
-    this.lastTime = 0;
     this.clock = new Clock();
 
     this.initialize().then(() => {
@@ -44,14 +49,14 @@ export class SceneManager {
     this.createScene();
     this.createCamera();
     this.createRenderer();
-    this.createHDRI();
+    // this.createHDRI();
     this.createLighting();
-    await this.createEarth();
+    this.createEarth();
     this.createControls();
     this.setupEventListeners();
 
     const axesHelper = new AxesHelper(5);
-    this.scene.add(axesHelper)
+    this.scene.add(axesHelper);
   }
 
   /**
@@ -92,15 +97,17 @@ export class SceneManager {
     const prmemGenerator = new PMREMGenerator(this.renderer);
     prmemGenerator.compileEquirectangularShader();
 
-    new RGBELoader().setDataType(FloatType).load("/HDR_white_local_star.hdr", (texture) => {
-      const envMap = prmemGenerator.fromEquirectangular(texture).texture;
+    new RGBELoader()
+      .setDataType(FloatType)
+      .load("/HDR_white_local_star.hdr", (texture) => {
+        const envMap = prmemGenerator.fromEquirectangular(texture).texture;
 
-      this.scene.environment = envMap;
-      this.scene.background = envMap;
+        this.scene.environment = envMap;
+        this.scene.background = envMap;
 
-      texture.dispose();
-      prmemGenerator.dispose();
-    });
+        texture.dispose();
+        prmemGenerator.dispose();
+      });
   }
 
   /**
@@ -116,8 +123,11 @@ export class SceneManager {
     this.createSunlight();
   }
 
-  createSunlight(){
-    const sunlight = new DirectionalLight(CONFIG.VISUAL.SUN_LIGHT_COLOR, CONFIG.VISUAL.SUN_LIGHT_INTENSITY);
+  createSunlight() {
+    const sunlight = new DirectionalLight(
+      CONFIG.VISUAL.SUN_LIGHT_COLOR,
+      CONFIG.VISUAL.SUN_LIGHT_INTENSITY
+    );
     sunlight.position.set(1, 1, -100);
     this.scene.add(sunlight);
   }
@@ -126,52 +136,7 @@ export class SceneManager {
    * Create the Earth sphere with texture
    */
   createEarth() {
-    try {
-      const textureLoader = new TextureLoader();
-      const earthTexture = textureLoader.load("/earth.jpg");
-      const bumpTexture = textureLoader.load("/Bump.jpg");
-      const cloudTexture = textureLoader.load("/Clouds.png");
-      earthTexture.colorSpace = SRGBColorSpace;
-
-      let cloudGeo = new SphereGeometry(1.005, CONFIG.VISUAL.EARTH_SEGMENTS, CONFIG.VISUAL.EARTH_SEGMENTS);
-      let cloudMaterial = new MeshStandardMaterial({
-        alphaMap: cloudTexture,
-        transparent: true,
-      });
-
-      const geometry = new SphereGeometry(
-        CONFIG.SCENE.EARTH_RADIUS,
-        CONFIG.VISUAL.EARTH_SEGMENTS,
-        CONFIG.VISUAL.EARTH_SEGMENTS
-      );
-      const material = new MeshStandardMaterial({ map: earthTexture, bumpMap: bumpTexture, bumpScale: 0.1 });
-
-      this.earth = new Mesh(geometry, material);
-      this.clouds = new Mesh(cloudGeo, cloudMaterial);
-      this.scene.add(this.earth);
-      this.scene.add(this.clouds);
-      this.camera.lookAt(this.earth.position);
-
-      console.log("Earth created and added to scene");
-    } catch (error) {
-      console.error("Error creating Earth:", error);
-      this.createFallbackEarth();
-    }
-  }
-
-  /**
-   * Create a fallback Earth without texture
-   */
-  createFallbackEarth() {
-    const geometry = new SphereGeometry(
-      CONFIG.SCENE.EARTH_RADIUS,
-      CONFIG.VISUAL.EARTH_SEGMENTS,
-      CONFIG.VISUAL.EARTH_SEGMENTS
-    );
-    const material = new MeshStandardMaterial({ color: 0x1e90ff });
-    this.earth = new Mesh(geometry, material);
-    this.scene.add(this.earth);
-    console.log("Fallback Earth created");
+    this.earth = new Earth(this.scene);
   }
 
   /**
@@ -258,12 +223,10 @@ export class SceneManager {
       this.controls.update();
     }
 
-    if(this.clouds){
-      console.log(deltaTime)
-      this.clouds.rotateY(deltaTime * 0.01 * .3)
+    if (this.earth) {
+      this.earth.cloudsRotation(deltaTime);
     }
   }
-
 
   /**
    * Render the scene
@@ -326,8 +289,7 @@ export class SceneManager {
     }
 
     if (this.earth) {
-      this.earth.geometry.dispose();
-      this.earth.material.dispose();
+      this.earth.dispose();
     }
 
     if (this.renderer) {
