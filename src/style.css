@@ -150,69 +150,15 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+
 }
 
-.control-group {
-    margin-bottom: var(--spacing-sm);
-}
-
-/* ===== TOGGLE SWITCH ===== */
-.toggle-control {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    cursor: pointer;
-    user-select: none;
-}
-
-.toggle-control input[type="checkbox"] {
-    display: none;
-}
-
-.toggle-slider {
-    position: relative;
-    width: 50px;
-    height: 24px;
-    background: var(--bg-tertiary);
-    border-radius: 12px;
-    transition: all var(--transition-normal);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.toggle-slider::before {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 18px;
-    height: 18px;
-    background: var(--text-secondary);
-    border-radius: 50%;
-    transition: all var(--transition-normal);
-    box-shadow: var(--shadow-sm);
-}
-
-.toggle-control input[type="checkbox"]:checked + .toggle-slider {
-    background: var(--primary-color);
-    box-shadow: 0 0 15px rgba(102, 153, 255, 0.4);
-}
-
-.toggle-control input[type="checkbox"]:checked + .toggle-slider::before {
-    transform: translateX(26px);
-    background: var(--text-primary);
-}
-
-.toggle-label {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    font-weight: 400;
-}
 
 /* ===== CAMERA MODE BUTTONS ===== */
-.control-group h3 {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--spacing-xs);
+.control-group h2 {
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-sm);
     font-weight: 600;
 }
 
@@ -533,16 +479,6 @@ body {
     }
 }
 
-/*@media (prefers-color-scheme: light) {*/
-/*    :root {*/
-/*        --bg-primary: #f8f9fa;*/
-/*        --bg-secondary: #ffffff;*/
-/*        --bg-tertiary: #e9ecef;*/
-/*        --text-primary: #212529;*/
-/*        --text-secondary: #495057;*/
-/*        --text-muted: #6c757d;*/
-/*    }*/
-/*}*/
 
 /* ===== FOCUS STYLES FOR ACCESSIBILITY ===== */
 .toggle-control:focus-within .toggle-slider {

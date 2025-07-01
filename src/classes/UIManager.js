@@ -14,7 +14,6 @@ export class UIManager {
   initialize() {
     this.cacheElements();
     this.setupEventListeners();
-    this.initializeDefaultStates();
     console.log("UI Manager initialized");
   }
 
@@ -25,7 +24,6 @@ export class UIManager {
     this.elements = {
       latitudeDisplay: document.getElementById("latitude-display"),
       longitudeDisplay: document.getElementById("longitude-display"),
-      rotationToggle: document.getElementById("rotation-toggle"),
       statusIndicator: document.getElementById("status-indicator"),
       coordinatesPanel: document.getElementById("coordinates-panel"),
       controlsPanel: document.getElementById("controls-panel"),
@@ -35,8 +33,6 @@ export class UIManager {
       staticModeBtn: document.getElementById("static-mode"),
       cameraModeButtons: document.querySelectorAll(".camera-btn"),
     };
-
-    console.log("UI elements cached:", this.elements.rotationToggle);
 
     // Validate that required elements exist
     this.validateElements();
@@ -64,13 +60,6 @@ export class UIManager {
    * Setup event listeners for UI elements
    */
   setupEventListeners() {
-    if (this.elements.rotationToggle) {
-      this.elements.rotationToggle.addEventListener("change", (event) => {
-        const isEnabled = event.target.checked;
-        this.handleRotationToggle(isEnabled);
-      });
-    }
-
     // Camera mode buttons
     this.elements.cameraModeButtons.forEach((button) => {
       button.addEventListener("click", (event) => {
@@ -85,9 +74,6 @@ export class UIManager {
    * @param {boolean} isEnabled - Whether rotation is enabled
    */
   handleRotationToggle(isEnabled) {
-    if (this.callbacks.onRotationToggle) {
-      this.callbacks.onRotationToggle(isEnabled);
-    }
 
     this.updateStatusIndicator(
       isEnabled ? "Rotation Enabled" : "Rotation Disabled"
@@ -206,15 +192,7 @@ export class UIManager {
     }, 500);
   }
 
-  /**
-   * Set rotation toggle state
-   * @param {boolean} enabled - Whether rotation is enabled
-   */
-  setRotationToggleState(enabled) {
-    if (this.elements.rotationToggle) {
-      this.elements.rotationToggle.checked = enabled;
-    }
-  }
+
 
   /**
    * Show loading state
@@ -288,33 +266,11 @@ export class UIManager {
    * Clean up event listeners and references
    */
   dispose() {
-    // Remove event listeners
-    if (this.elements.rotationToggle) {
-      this.elements.rotationToggle.removeEventListener(
-        "change",
-        this.handleRotationToggle
-      );
-    }
 
     // Clear references
     this.elements = {};
     this.callbacks = {};
 
     console.log("UI Manager disposed");
-  }
-
-  /**
-   * Initialize default states of UI elements
-   */
-  initializeDefaultStates() {
-    // S'assurer que le toggle de rotation est dans l'état attendu
-    if (this.elements.rotationToggle) {
-      const isChecked = this.elements.rotationToggle.checked;
-
-      // Si le toggle est checked par défaut dans le HTML, notifier immédiatement
-      if (isChecked && this.callbacks.onRotationToggle) {
-        this.callbacks.onRotationToggle(true);
-      }
-    }
   }
 }

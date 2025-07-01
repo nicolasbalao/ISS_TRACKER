@@ -32,7 +32,6 @@ export class SceneManager {
     this.controls = null;
     this.earth = null;
     this.animationId = null;
-    this.rotationEnabled = true;
     this.rotationAngle = 0;
     this.cameraRadius = CONFIG.SCENE.CAMERA_RADIUS;
     this.issMarker = null; // Référence pour l'animation
@@ -250,12 +249,10 @@ export class SceneManager {
    * Update orbit camera (rotation autour de la Terre)
    */
   updateOrbitCamera() {
-    if (this.rotationEnabled) {
       this.rotationAngle += CONFIG.SCENE.ROTATION_SPEED;
       this.camera.position.x = this.cameraRadius * Math.sin(this.rotationAngle);
       this.camera.position.z = this.cameraRadius * Math.cos(this.rotationAngle);
       this.camera.lookAt(this.earth.position);
-    }
   }
 
   /**
@@ -292,15 +289,6 @@ export class SceneManager {
     if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
     }
-  }
-
-  /**
-   * Toggle automatic camera rotation
-   * @param {boolean} enabled - Whether rotation should be enabled
-   */
-  setRotationEnabled(enabled) {
-    this.rotationEnabled = enabled;
-    console.log(`Camera rotation ${enabled ? "enabled" : "disabled"}`);
   }
 
   /**
