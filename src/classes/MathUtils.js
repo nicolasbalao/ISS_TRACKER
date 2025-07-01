@@ -1,28 +1,20 @@
 import { Vector3 } from "three";
+import {degToRad} from "three/src/math/MathUtils.js";
+import {CONFIG} from "../config/config.js";
 
 /**
  * Utility class for mathematical calculations and conversions
  */
 export class MathUtils {
-  /**
-   * Convert latitude and longitude to 3D Vector3 position
-   * @param {number} lat - Latitude in degrees
-   * @param {number} lon - Longitude in degrees
-   * @param {number} radius - Radius of the sphere
-   * @returns {Vector3} 3D position vector
-   */
-  static convertLatLonToVector3D(lat, lon, radius = 1) {
-    if (!this.isValidLatitude(lat) || !this.isValidLongitude(lon)) {
-      console.warn(`Invalid coordinates: lat=${lat}, lon=${lon}`);
-      return new Vector3(0, 0, 0);
-    }
 
-    const phi = (90 - lat) * (Math.PI / 180);
-    const theta = (lon + 180) * (Math.PI / 180);
+  static  convertLatLonToVector3D(lat, lon, radius = CONFIG.SCENE.EARTH_RADIUS) {
 
-    const x = radius * Math.sin(phi) * Math.cos(theta);
-    const y = radius * Math.cos(phi);
-    const z = radius * Math.sin(phi) * Math.sin(theta);
+    const latR = degToRad(lat);
+    const lonR = degToRad(-lon);
+
+    const x = radius * Math.cos(latR) * Math.cos(lonR);
+    const y = radius * Math.sin(latR);
+    const z = radius * Math.cos(latR) * Math.sin(lonR) ;
 
     return new Vector3(x, y, z);
   }

@@ -22,7 +22,8 @@ export const CONFIG = {
     ISS_MARKER_RADIUS: 0.05,
     ISS_GROUND_REFERENCE: {
       HEIGHT_OFFSET: 0.0005,
-      COLOR: 0X00FFFF
+      // COLOR: 0X00FFFF
+      COLOR: 0XFF0000
     },
     CLOUDS_ROTATION_SPEED: 0.3
 
@@ -63,14 +64,10 @@ export const CONFIG = {
     ENABLE_ZOOM: true,
     ENABLE_PAN: false,
   },
-
-  // Application Metadata
-  APP: {
-    NAME: "ISS Tracker 3D",
-    VERSION: "2.0.0",
-    DESCRIPTION: "Suivi en temps réel de la Station Spatiale Internationale",
-    AUTHOR: "ISS Tracker Team",
-  },
+  DEFAULT_POSITION: {
+    lat: 0,
+    lon: 0,
+  }
 };
 
 // Validation functions for configuration
