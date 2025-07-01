@@ -1,5 +1,5 @@
 import {
-  AmbientLight,
+  AmbientLight, DirectionalLight,
   Mesh,
   MeshStandardMaterial,
   PerspectiveCamera,
@@ -10,6 +10,7 @@ import {
 } from "three";
 import { OrbitControls } from "three/addons";
 import { CONFIG } from "../config/config.js";
+import scene from "three/addons/offscreen/scene.js";
 
 /**
  * Class responsible for managing the 3D scene, camera, and renderer
@@ -91,6 +92,14 @@ export class SceneManager {
       CONFIG.VISUAL.AMBIENT_LIGHT_INTENSITY
     );
     this.scene.add(ambientLight);
+
+    this.createSunlight();
+  }
+
+  createSunlight(){
+    const sunlight = new DirectionalLight(0xffffff, 1.5);
+    sunlight.position.set(5, 3, 5)
+    this.scene.add(sunlight);
   }
 
   /**

@@ -5,7 +5,7 @@ export const CONFIG = {
   // API Configuration
   API: {
     ISS_POSITION_URL: "http://api.open-notify.org/iss-now.json",
-    POLLING_INTERVAL: 5000, // 5 seconds
+    POLLING_INTERVAL: 10000, // 10 seconds
     TIMEOUT: 10000, // 10 seconds
   },
 
@@ -26,7 +26,7 @@ export const CONFIG = {
   ISS_MODEL: {
     PATH: "/ISS_stationary.glb",
     SCALE: 0.001,
-    ROTATION_SPEED: 0.0005,
+    ROTATION_SPEED: 0.0003,
     INITIAL_ROTATION: { x: Math.PI / 2, y: 0, z: 0 },
   },
 
@@ -36,7 +36,7 @@ export const CONFIG = {
     ISS_SEGMENTS: 32,
     DEFAULT_ISS_COLOR: 0xff0000,
     AMBIENT_LIGHT_COLOR: 0xffffff,
-    AMBIENT_LIGHT_INTENSITY: 1,
+    AMBIENT_LIGHT_INTENSITY:0.4,
   },
 
   // UI Configuration
