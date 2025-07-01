@@ -1,14 +1,14 @@
 import {
-  AmbientLight, DirectionalLight,
+  AmbientLight, AxesHelper, DirectionalLight, FloatType,
   Mesh,
   MeshStandardMaterial,
-  PerspectiveCamera,
+  PerspectiveCamera, PMREMGenerator,
   Scene,
   SphereGeometry,
   TextureLoader,
   WebGLRenderer,
 } from "three";
-import { OrbitControls } from "three/addons";
+import {OrbitControls, RGBELoader} from "three/addons";
 import { CONFIG } from "../config/config.js";
 import scene from "three/addons/offscreen/scene.js";
 
@@ -42,6 +42,7 @@ export class SceneManager {
     this.createScene();
     this.createCamera();
     this.createRenderer();
+    this.createHDRI();
     this.createLighting();
     await this.createEarth();
     this.createControls();
@@ -83,6 +84,21 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
   }
 
+  createHDRI() {
+    const prmemGenerator = new PMREMGenerator(this.renderer);
+    prmemGenerator.compileEquirectangularShader();
+
+    new RGBELoader().setDataType(FloatType).load("/HDR_white_local_star.hdr", (texture) => {
+      const envMap = prmemGenerator.fromEquirectangular(texture).texture;
+
+      this.scene.environment = envMap;
+      this.scene.background = envMap;
+
+      texture.dispose();
+      prmemGenerator.dispose();
+    });
+  }
+
   /**
    * Create ambient lighting for the scene
    */
@@ -98,7 +114,7 @@ export class SceneManager {
 
   createSunlight(){
     const sunlight = new DirectionalLight(0xffffff, 1.5);
-    sunlight.position.set(5, 3, 5)
+    sunlight.position.set(1, 1, -100);
     this.scene.add(sunlight);
   }
 
