@@ -17,8 +17,10 @@ import {
 } from "three";
 import { OrbitControls, RGBELoader } from "three/addons";
 import { CONFIG } from "../config/config.js";
+import { getAllResources } from "../config/resources.js";
 import scene from "three/addons/offscreen/scene.js";
 import { Earth } from "./Earth.js";
+import { ResourceLoader } from "./ResourceLoader.js";
 
 /**
  * Class responsible for managing the 3D scene, camera, and renderer
@@ -36,31 +38,104 @@ export class SceneManager {
     this.cameraRadius = CONFIG.SCENE.CAMERA_RADIUS;
     this.issMarker = null; // Référence pour l'animation
     this.clock = new Clock();
+    this.resourceLoader = new ResourceLoader();
+    this.pmremGenerator = null;
 
     // Camera modes
     this.cameraMode = "orbit"; // 'orbit', 'follow-iss', 'static'
     this.followOffset = new Vector3(0, 0, 0); // Offset pour la caméra qui suit l'ISS
 
-    this.initialize().then(() => {
-      console.log("Scene manager initialized");
-    });
+    // Loading state
+    this.isResourcesLoaded = false;
+    this.loadingPromise = null;
   }
 
   /**
    * Initialize the scene, camera, renderer, and controls
    */
   async initialize() {
+    // Create basic scene components first
     this.createScene();
     this.createCamera();
     this.createRenderer();
-    // this.createHDRI();
-    this.createLighting();
-    this.createEarth();
     this.createControls();
     this.setupEventListeners();
 
+    // Create PMREM generator for HDR processing
+    this.pmremGenerator = new PMREMGenerator(this.renderer);
+    this.pmremGenerator.compileEquirectangularShader();
+
+    // Define all resources to load using centralized configuration
+    const resources = getAllResources(false); // Exclude optional resources for now
+
+    // Setup resource loader
+    this.resourceLoader.defineResources(resources);
+
+    // Start loading resources
+    this.loadingPromise = this.resourceLoader.startLoading();
+
+    return this.loadingPromise;
+  }
+
+  /**
+   * Complete scene setup after resources are loaded
+   */
+  completeInitialization() {
+    if (this.isResourcesLoaded) {
+      console.warn("Scene already initialized");
+      return;
+    }
+
+    // Setup HDR environment
+    this.setupHDREnvironment();
+
+    // Create lighting and objects
+    this.createLighting();
+    this.createEarth();
+
+    // Add helpers
     const axesHelper = new AxesHelper(5);
     this.scene.add(axesHelper);
+
+    this.isResourcesLoaded = true;
+    console.log("Scene manager initialization completed");
+  }
+
+  /**
+   * Setup HDR environment using loaded HDR texture
+   */
+  setupHDREnvironment() {
+    const hdrTexture = this.resourceLoader.getResource("hdr_environment");
+    if (hdrTexture && this.pmremGenerator) {
+      const envMap =
+        this.pmremGenerator.fromEquirectangular(hdrTexture).texture;
+
+      this.scene.environment = envMap;
+      this.scene.background = envMap;
+
+      // Clean up
+      hdrTexture.dispose();
+    } else {
+      console.warn("HDR texture not found, using fallback lighting");
+    }
+  }
+
+  /**
+   * Get resource loader instance for external access
+   */
+  getResourceLoader() {
+    return this.resourceLoader;
+  }
+
+  /**
+   * Wait for resources to be loaded
+   */
+  async waitForResources() {
+    if (this.loadingPromise) {
+      await this.loadingPromise;
+      this.completeInitialization();
+    }
+    return this.isResourcesLoaded;
   }
 
   /**
@@ -94,24 +169,13 @@ export class SceneManager {
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.render.outputColorSpace = SRGBColorSpace;
+    this.renderer.outputColorSpace = SRGBColorSpace;
   }
 
   createHDRI() {
-    const prmemGenerator = new PMREMGenerator(this.renderer);
-    prmemGenerator.compileEquirectangularShader();
-
-    new RGBELoader()
-      .setDataType(FloatType)
-      .load("/HDR_white_local_star.hdr", (texture) => {
-        const envMap = prmemGenerator.fromEquirectangular(texture).texture;
-
-        this.scene.environment = envMap;
-        this.scene.background = envMap;
-
-        texture.dispose();
-        prmemGenerator.dispose();
-      });
+    // This method is now handled by the resource loader
+    // Keep for backward compatibility but functionality moved to setupHDREnvironment
+    console.log("HDR setup is now handled by ResourceLoader");
   }
 
   /**
@@ -140,7 +204,8 @@ export class SceneManager {
    * Create the Earth sphere with texture
    */
   createEarth() {
-    this.earth = new Earth(this.scene);
+    // Pass the resource loader to Earth class
+    this.earth = new Earth(this.scene, this.resourceLoader);
   }
 
   /**
@@ -249,10 +314,10 @@ export class SceneManager {
    * Update orbit camera (rotation autour de la Terre)
    */
   updateOrbitCamera() {
-      this.rotationAngle += CONFIG.SCENE.ROTATION_SPEED;
-      this.camera.position.x = this.cameraRadius * Math.sin(this.rotationAngle);
-      this.camera.position.z = this.cameraRadius * Math.cos(this.rotationAngle);
-      this.camera.lookAt(this.earth.position);
+    this.rotationAngle += CONFIG.SCENE.ROTATION_SPEED;
+    this.camera.position.x = this.cameraRadius * Math.sin(this.rotationAngle);
+    this.camera.position.z = this.cameraRadius * Math.cos(this.rotationAngle);
+    this.camera.lookAt(this.earth.position);
   }
 
   /**
@@ -260,25 +325,29 @@ export class SceneManager {
    */
   updateFollowISSCamera() {
     if (this.issMarker && this.issMarker.getMesh()) {
-        const issPosition = this.issMarker.getMesh().position;
-        const earthCenter = this.earth.earthGroup.position;
+      const issPosition = this.issMarker.getMesh().position;
+      const earthCenter = this.earth.earthGroup.position;
 
-        const issDirection = issPosition.clone().sub(earthCenter).normalize();
+      const issDirection = issPosition.clone().sub(earthCenter).normalize();
 
-        const heightOffset = 1;
-        const backwardOffset = 0.3;
+      const heightOffset = 1;
+      const backwardOffset = 0.3;
 
-        const upVector = issDirection.clone();
+      const upVector = issDirection.clone();
 
-        const tangent = new Vector3(-issDirection.z, 0, issDirection.x).normalize();
+      const tangent = new Vector3(
+        -issDirection.z,
+        0,
+        issDirection.x
+      ).normalize();
 
-        const cameraPosition = issPosition.clone()
-            .add(upVector.clone().multiplyScalar(heightOffset))
-            .add(tangent.clone().multiplyScalar(-backwardOffset));
+      const cameraPosition = issPosition
+        .clone()
+        .add(upVector.clone().multiplyScalar(heightOffset))
+        .add(tangent.clone().multiplyScalar(-backwardOffset));
 
-        this.camera.position.lerp(cameraPosition, 0.5);
-        this.camera.lookAt(earthCenter);
-
+      this.camera.position.lerp(cameraPosition, 0.5);
+      this.camera.lookAt(earthCenter);
     }
   }
 
@@ -346,6 +415,14 @@ export class SceneManager {
       this.earth.dispose();
     }
 
+    if (this.pmremGenerator) {
+      this.pmremGenerator.dispose();
+    }
+
+    if (this.resourceLoader) {
+      this.resourceLoader.dispose();
+    }
+
     if (this.renderer) {
       this.renderer.dispose();
     }
@@ -353,5 +430,15 @@ export class SceneManager {
     window.removeEventListener("resize", this.handleResize);
 
     console.log("Scene manager disposed");
+  }
+
+  /**
+   * Public method to start initialization
+   */
+  async startInitialization() {
+    if (!this.loadingPromise) {
+      this.loadingPromise = this.initialize();
+    }
+    return this.loadingPromise;
   }
 }

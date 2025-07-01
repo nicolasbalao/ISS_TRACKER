@@ -9,8 +9,9 @@ import {
 import { CONFIG } from "../config/config.js";
 
 export class Earth {
-  constructor(scene) {
+  constructor(scene, resourceLoader = null) {
     this.scene = scene;
+    this.resourceLoader = resourceLoader;
     this.clouds = null;
     this.earthGroup = new Group();
     this.textureLoader = new TextureLoader();
@@ -25,8 +26,24 @@ export class Earth {
   }
 
   createEarth() {
-    const texture = this.textureLoader.load("/earth.jpg");
-    texture.colorSpace = SRGBColorSpace;
+    let earthTexture, bumpTexture;
+
+    // Try to get textures from resource loader first
+    if (this.resourceLoader) {
+      earthTexture = this.resourceLoader.getResource("earth_diffuse");
+      bumpTexture = this.resourceLoader.getResource("earth_bump");
+    }
+
+    // Fallback to loading textures if not available
+    if (!earthTexture) {
+      earthTexture = this.textureLoader.load("/earth.jpg");
+      earthTexture.colorSpace = SRGBColorSpace;
+    }
+
+    if (!bumpTexture) {
+      bumpTexture = this.textureLoader.load("/Bump.jpg");
+    }
+
     const geometry = new SphereGeometry(
       CONFIG.VISUAL.EARTH_RADIUS,
       CONFIG.VISUAL.EARTH_SEGMENTS,
@@ -34,16 +51,28 @@ export class Earth {
     );
 
     const material = new MeshStandardMaterial({
-      map: texture,
-      bumpMap: this.textureLoader.load("/Bump.jpg"),
+      map: earthTexture,
+      bumpMap: bumpTexture,
       bumpScale: 0.1,
     });
+
     const earth = new Mesh(geometry, material);
     this.earthGroup.add(earth);
   }
 
   createClouds() {
-    const cloudTexture = this.textureLoader.load("/Clouds.png");
+    let cloudTexture;
+
+    // Try to get cloud texture from resource loader first
+    if (this.resourceLoader) {
+      cloudTexture = this.resourceLoader.getResource("clouds_alpha");
+    }
+
+    // Fallback to loading texture if not available
+    if (!cloudTexture) {
+      cloudTexture = this.textureLoader.load("/Clouds.png");
+    }
+
     // Rayon légèrement plus grand que la Terre pour que les nuages apparaissent au-dessus
     const cloudRadius = CONFIG.SCENE.EARTH_RADIUS * 1.005;
     const cloudGeo = new SphereGeometry(

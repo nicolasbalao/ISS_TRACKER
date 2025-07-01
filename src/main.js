@@ -3,6 +3,8 @@ import { ISSPositionService } from "./classes/ISSPositionService.js";
 import { ISSMarker } from "./classes/ISSMarker.js";
 import { UIManager } from "./classes/UIManager.js";
 import { GroundReferenceMarker } from "./classes/GroundReferenceMarker.js";
+import { LoadingScreen } from "./classes/LoadingScreen.js";
+import { getAllResources } from "./config/resources.js";
 import { update } from "three/addons/libs/tween.module.js";
 import { Vector3 } from "three";
 
@@ -17,6 +19,7 @@ class ISSTrackerApp {
     this.uiManager = null;
     this.isInitialized = false;
     this.groundReferenceMarker = null; // For future use
+    this.loadingScreen = null;
   }
 
   /**
@@ -26,9 +29,12 @@ class ISSTrackerApp {
     try {
       console.log("Initializing ISS Tracker App...");
 
-      // Initialize UI first
+      // Create and show advanced loading screen
+      this.loadingScreen = new LoadingScreen();
+      this.loadingScreen.show();
+
+      // Initialize UI manager but keep original loading hidden
       this.uiManager = new UIManager();
-      this.uiManager.showLoading();
 
       // Initialize 3D scene
       const canvas = document.querySelector("#scene");
@@ -36,7 +42,44 @@ class ISSTrackerApp {
         throw new Error("Canvas element not found");
       }
 
-      this.sceneManager = new SceneManager(canvas); // Initialize ISS marker
+      this.sceneManager = new SceneManager(canvas);
+
+      // Setup resource loading callbacks
+      const resourceLoader = this.sceneManager.getResourceLoader();
+
+      resourceLoader.onProgress((progress, loaded, total) => {
+        this.loadingScreen.updateProgress(progress, loaded, total);
+      });
+
+      // Start scene initialization
+      await this.sceneManager.startInitialization();
+
+
+
+      // Track individual resource loading based on centralized config
+      const allResources = getAllResources(false);
+      allResources.forEach((resource) => {
+        this.loadingScreen.updateResourceStatus(resource.name, "loading");
+      });
+
+      resourceLoader.onComplete((resources) => {
+        // Update all resources as loaded
+        allResources.forEach((resource) => {
+          this.loadingScreen.updateResourceStatus(resource.name, "loaded");
+        });
+      });
+
+      resourceLoader.onError((error, resourceName) => {
+        console.error(`Failed to load resource: ${resourceName}`, error);
+        this.loadingScreen.updateResourceStatus(resourceName, "error");
+      });
+
+      // Wait for all 3D resources to load
+      this.loadingScreen.setStatus("Chargement des textures 3D...");
+      await this.sceneManager.waitForResources();
+
+      // Initialize ISS marker
+      this.loadingScreen.setStatus("Création du modèle ISS...");
       this.issMarker = new ISSMarker(this.sceneManager.getScene());
 
       this.groundReferenceMarker = new GroundReferenceMarker(
@@ -47,24 +90,40 @@ class ISSTrackerApp {
       this.sceneManager.setISSMarker(this.issMarker);
 
       // Wait for ISS marker to load before proceeding
+      this.loadingScreen.setStatus("Chargement du modèle ISS...");
       await this.issMarker.waitForLoad();
 
       // Initialize position service
+      this.loadingScreen.setStatus("Connexion au service de position...");
       this.positionService = new ISSPositionService();
 
       // Setup event handlers
       this.setupEventHandlers();
 
       // Start services
+      this.loadingScreen.setStatus("Démarrage des services...");
       await this.startServices();
 
       this.isInitialized = true;
-      this.uiManager.hideLoading();
-      this.uiManager.showSuccess("ISS Tracker initialized successfully");
+
+      // Hide loading screen with delay for smooth transition
+      this.loadingScreen.setStatus("Finalisation...");
+      setTimeout(() => {
+        this.loadingScreen.hide();
+        this.uiManager.showSuccess("ISS Tracker initialized successfully");
+      }, 1000);
 
       console.log("ISS Tracker App initialized successfully");
     } catch (error) {
       console.error("Failed to initialize app:", error);
+
+      if (this.loadingScreen) {
+        this.loadingScreen.setStatus("Erreur lors du chargement");
+        setTimeout(() => {
+          this.loadingScreen.hide();
+        }, 2000);
+      }
+
       if (this.uiManager) {
         this.uiManager.showError("Failed to initialize application");
       }
@@ -253,6 +312,10 @@ class ISSTrackerApp {
     console.log("Disposing ISS Tracker App...");
 
     this.stopServices();
+
+    if (this.loadingScreen) {
+      this.loadingScreen.dispose();
+    }
 
     if (this.issMarker) {
       this.issMarker.destroy();
