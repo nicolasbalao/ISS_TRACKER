@@ -1,10 +1,10 @@
 import {
-  AmbientLight, AxesHelper, DirectionalLight, FloatType,
+  AmbientLight, AxesHelper, Clock, DirectionalLight, FloatType,
   Mesh,
   MeshStandardMaterial,
   PerspectiveCamera, PMREMGenerator,
   Scene,
-  SphereGeometry,
+  SphereGeometry, SRGBColorSpace,
   TextureLoader,
   WebGLRenderer,
 } from "three";
@@ -23,12 +23,14 @@ export class SceneManager {
     this.renderer = null;
     this.controls = null;
     this.earth = null;
+    this.clouds = null;
     this.animationId = null;
     this.rotationEnabled = true;
     this.rotationAngle = 0;
     this.cameraRadius = CONFIG.SCENE.CAMERA_RADIUS;
     this.issMarker = null; // Référence pour l'animation
     this.lastTime = 0;
+    this.clock = new Clock();
 
     this.initialize().then(() => {
       console.log("Scene manager initialized");
@@ -42,7 +44,7 @@ export class SceneManager {
     this.createScene();
     this.createCamera();
     this.createRenderer();
-    // this.createHDRI();
+    this.createHDRI();
     this.createLighting();
     await this.createEarth();
     this.createControls();
@@ -80,11 +82,10 @@ export class SceneManager {
     this.renderer = new WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
-      alpha: true,
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.shadowMap.enabled = true;
+    this.render.outputColorSpace = SRGBColorSpace;
   }
 
   createHDRI() {
@@ -116,7 +117,7 @@ export class SceneManager {
   }
 
   createSunlight(){
-    const sunlight = new DirectionalLight(0xffffff, 1.5);
+    const sunlight = new DirectionalLight(CONFIG.VISUAL.SUN_LIGHT_COLOR, CONFIG.VISUAL.SUN_LIGHT_INTENSITY);
     sunlight.position.set(1, 1, -100);
     this.scene.add(sunlight);
   }
@@ -128,16 +129,27 @@ export class SceneManager {
     try {
       const textureLoader = new TextureLoader();
       const earthTexture = textureLoader.load("/earth.jpg");
+      const bumpTexture = textureLoader.load("/Bump.jpg");
+      const cloudTexture = textureLoader.load("/Clouds.png");
+      earthTexture.colorSpace = SRGBColorSpace;
+
+      let cloudGeo = new SphereGeometry(1.005, CONFIG.VISUAL.EARTH_SEGMENTS, CONFIG.VISUAL.EARTH_SEGMENTS);
+      let cloudMaterial = new MeshStandardMaterial({
+        alphaMap: cloudTexture,
+        transparent: true,
+      });
 
       const geometry = new SphereGeometry(
         CONFIG.SCENE.EARTH_RADIUS,
         CONFIG.VISUAL.EARTH_SEGMENTS,
         CONFIG.VISUAL.EARTH_SEGMENTS
       );
-      const material = new MeshStandardMaterial({ map: earthTexture });
+      const material = new MeshStandardMaterial({ map: earthTexture, bumpMap: bumpTexture, bumpScale: 0.1 });
 
       this.earth = new Mesh(geometry, material);
+      this.clouds = new Mesh(cloudGeo, cloudMaterial);
       this.scene.add(this.earth);
+      this.scene.add(this.clouds);
       this.camera.lookAt(this.earth.position);
 
       console.log("Earth created and added to scene");
@@ -228,9 +240,7 @@ export class SceneManager {
    * Update animation frame
    */
   updateAnimation() {
-    const currentTime = performance.now();
-    const deltaTime = currentTime - this.lastTime;
-    this.lastTime = currentTime;
+    const deltaTime = this.clock.getDelta();
 
     if (this.rotationEnabled) {
       this.rotationAngle += CONFIG.SCENE.ROTATION_SPEED;
@@ -247,7 +257,13 @@ export class SceneManager {
     if (this.controls) {
       this.controls.update();
     }
+
+    if(this.clouds){
+      console.log(deltaTime)
+      this.clouds.rotateY(deltaTime * 0.01 * .3)
+    }
   }
+
 
   /**
    * Render the scene

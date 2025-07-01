@@ -5,7 +5,7 @@ export const CONFIG = {
   // API Configuration
   API: {
     ISS_POSITION_URL: "http://api.open-notify.org/iss-now.json",
-    POLLING_INTERVAL: 10000, // 10 seconds
+    POLLING_INTERVAL: 60000, // 60 seconds
     TIMEOUT: 10000, // 10 seconds
   },
 
@@ -41,7 +41,9 @@ export const CONFIG = {
     ISS_SEGMENTS: 32,
     DEFAULT_ISS_COLOR: 0xff0000,
     AMBIENT_LIGHT_COLOR: 0xffffff,
-    AMBIENT_LIGHT_INTENSITY:0.4,
+    AMBIENT_LIGHT_INTENSITY: 1,
+    SUN_LIGHT_COLOR: 0xffffff,
+    SUN_LIGHT_INTENSITY: 2,
   },
 
   // UI Configuration
@@ -51,11 +53,6 @@ export const CONFIG = {
     PANEL_ANIMATION_DURATION: 300,
   },
 
-  // Default ISS Position (fallback)
-  DEFAULT_POSITION: {
-    lat: 39.8027,
-    lon: 162.8492,
-  },
 
   // Controls Configuration
   CONTROLS: {

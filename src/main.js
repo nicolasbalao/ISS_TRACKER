@@ -120,7 +120,6 @@ class ISSTrackerApp {
 
       if(this.groundReferenceMarker) {
         this.groundReferenceMarker.updatePosition(position)
-        debugger;
         this.groundReferenceMarker.createConnectionLine(this.issMarker.mesh.position)
       }
 
