@@ -14,12 +14,17 @@ export const CONFIG = {
     CAMERA_FOV: 45,
     CAMERA_NEAR: 0.1,
     CAMERA_FAR: 1000,
-    CAMERA_INITIAL_Z: 3,
-    CAMERA_RADIUS: 3,
+    CAMERA_INITIAL_Z: 3.5,
+    CAMERA_RADIUS: 3.5,
     ROTATION_SPEED: 0.001,
     EARTH_RADIUS: 1,
     ISS_ORBIT_HEIGHT: 1.1,
     ISS_MARKER_RADIUS: 0.05,
+    ISS_GROUND_REFERENCE: {
+      HEIGHT_OFFSET: 0.0005,
+      COLOR: 0X00FFFF
+    }
+
   },
 
   // ISS 3D Model Configuration

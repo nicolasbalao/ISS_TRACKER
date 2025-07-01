@@ -42,7 +42,7 @@ export class SceneManager {
     this.createScene();
     this.createCamera();
     this.createRenderer();
-    this.createHDRI();
+    // this.createHDRI();
     this.createLighting();
     await this.createEarth();
     this.createControls();

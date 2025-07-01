@@ -2,6 +2,8 @@ import { SceneManager } from "./classes/SceneManager.js";
 import { ISSPositionService } from "./classes/ISSPositionService.js";
 import { ISSMarker } from "./classes/ISSMarker.js";
 import { UIManager } from "./classes/UIManager.js";
+import {GroundReferenceMarker} from "./classes/GroundReferenceMarker.js";
+import {update} from "three/addons/libs/tween.module.js";
 
 /**
  * Main application class that coordinates all components
@@ -13,6 +15,7 @@ class ISSTrackerApp {
     this.issMarker = null;
     this.uiManager = null;
     this.isInitialized = false;
+    this.groundReferenceMarker = null; // For future use
   }
 
   /**
@@ -34,6 +37,8 @@ class ISSTrackerApp {
 
       this.sceneManager = new SceneManager(canvas); // Initialize ISS marker
       this.issMarker = new ISSMarker(this.sceneManager.getScene());
+
+      this.groundReferenceMarker = new GroundReferenceMarker(this.sceneManager.getScene());
 
       // Connect ISS marker to scene manager for animation
       this.sceneManager.setISSMarker(this.issMarker);
@@ -111,6 +116,12 @@ class ISSTrackerApp {
       // Update 3D marker position
       if (this.issMarker) {
         this.issMarker.updatePosition(position);
+      }
+
+      if(this.groundReferenceMarker) {
+        this.groundReferenceMarker.updatePosition(position)
+        debugger;
+        this.groundReferenceMarker.createConnectionLine(this.issMarker.mesh.position)
       }
 
       // Update UI display
@@ -226,6 +237,10 @@ class ISSTrackerApp {
 
     if (this.issMarker) {
       this.issMarker.destroy();
+    }
+
+    if(this.groundReferenceMarker){
+      this.issMarker.dispose();
     }
 
     if (this.sceneManager) {
