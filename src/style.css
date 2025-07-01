@@ -208,6 +208,53 @@ body {
     font-weight: 400;
 }
 
+/* ===== CAMERA MODE BUTTONS ===== */
+.control-group h3 {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+}
+
+.camera-mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.camera-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-family: var(--font-family);
+}
+
+.camera-btn:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary-color);
+    transform: translateX(2px);
+}
+
+.camera-btn.active {
+    background: var(--primary-color);
+    color: var(--text-primary);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(102, 153, 255, 0.4);
+}
+
+.camera-btn:active {
+    transform: translateX(1px);
+}
+
 /* ===== INFO PANEL ===== */
 .info-panel {
     position: absolute;

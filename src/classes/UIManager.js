@@ -29,6 +29,11 @@ export class UIManager {
       statusIndicator: document.getElementById("status-indicator"),
       coordinatesPanel: document.getElementById("coordinates-panel"),
       controlsPanel: document.getElementById("controls-panel"),
+      // Camera mode buttons
+      orbitModeBtn: document.getElementById("orbit-mode"),
+      followISSModeBtn: document.getElementById("follow-iss-mode"),
+      staticModeBtn: document.getElementById("static-mode"),
+      cameraModeButtons: document.querySelectorAll(".camera-btn"),
     };
 
     console.log("UI elements cached:", this.elements.rotationToggle);
@@ -65,6 +70,14 @@ export class UIManager {
         this.handleRotationToggle(isEnabled);
       });
     }
+
+    // Camera mode buttons
+    this.elements.cameraModeButtons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const mode = event.currentTarget.dataset.mode;
+        this.handleCameraModeChange(mode);
+      });
+    });
   }
 
   /**
@@ -80,6 +93,31 @@ export class UIManager {
       isEnabled ? "Rotation Enabled" : "Rotation Disabled"
     );
     console.log(`Rotation toggled: ${isEnabled}`);
+  }
+
+  /**
+   * Handle camera mode change
+   * @param {string} mode - Camera mode: 'orbit', 'follow-iss', 'static'
+   */
+  handleCameraModeChange(mode) {
+    // Update visual state of buttons
+    this.elements.cameraModeButtons.forEach((button) => {
+      button.classList.toggle("active", button.dataset.mode === mode);
+    });
+
+    // Call callback if registered
+    if (this.callbacks.onCameraModeChange) {
+      this.callbacks.onCameraModeChange(mode);
+    }
+
+    // Update status indicator
+    const modeNames = {
+      orbit: "Mode Orbite",
+      "follow-iss": "Suivi ISS",
+      static: "Mode Statique",
+    };
+    this.updateStatusIndicator(modeNames[mode] || "Mode Inconnu");
+    console.log(`Camera mode changed to: ${mode}`);
   }
 
   /**

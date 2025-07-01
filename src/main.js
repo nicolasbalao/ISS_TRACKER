@@ -2,8 +2,9 @@ import { SceneManager } from "./classes/SceneManager.js";
 import { ISSPositionService } from "./classes/ISSPositionService.js";
 import { ISSMarker } from "./classes/ISSMarker.js";
 import { UIManager } from "./classes/UIManager.js";
-import {GroundReferenceMarker} from "./classes/GroundReferenceMarker.js";
-import {update} from "three/addons/libs/tween.module.js";
+import { GroundReferenceMarker } from "./classes/GroundReferenceMarker.js";
+import { update } from "three/addons/libs/tween.module.js";
+import { Vector3 } from "three";
 
 /**
  * Main application class that coordinates all components
@@ -38,7 +39,9 @@ class ISSTrackerApp {
       this.sceneManager = new SceneManager(canvas); // Initialize ISS marker
       this.issMarker = new ISSMarker(this.sceneManager.getScene());
 
-      this.groundReferenceMarker = new GroundReferenceMarker(this.sceneManager.getScene());
+      this.groundReferenceMarker = new GroundReferenceMarker(
+        this.sceneManager.getScene()
+      );
 
       // Connect ISS marker to scene manager for animation
       this.sceneManager.setISSMarker(this.issMarker);
@@ -82,6 +85,11 @@ class ISSTrackerApp {
       this.handleRotationToggle(enabled);
     });
 
+    // Handle camera mode change
+    this.uiManager.on("onCameraModeChange", (mode) => {
+      this.handleCameraModeChange(mode);
+    });
+
     // Handle errors
     this.setupErrorHandling();
   }
@@ -118,9 +126,11 @@ class ISSTrackerApp {
         this.issMarker.updatePosition(position);
       }
 
-      if(this.groundReferenceMarker) {
-        this.groundReferenceMarker.updatePosition(position)
-        this.groundReferenceMarker.createConnectionLine(this.issMarker.mesh.position)
+      if (this.groundReferenceMarker) {
+        this.groundReferenceMarker.updatePosition(position);
+        this.groundReferenceMarker.createConnectionLine(
+          this.issMarker.mesh.position
+        );
       }
 
       // Update UI display
@@ -138,12 +148,22 @@ class ISSTrackerApp {
   }
 
   /**
-   * Handle rotation toggle
+   * Handle rotation toggle from UI
    * @param {boolean} enabled - Whether rotation is enabled
    */
   handleRotationToggle(enabled) {
     if (this.sceneManager) {
       this.sceneManager.setRotationEnabled(enabled);
+    }
+  }
+
+  /**
+   * Handle camera mode change from UI
+   * @param {string} mode - Camera mode: 'orbit', 'follow-iss', 'static'
+   */
+  handleCameraModeChange(mode) {
+    if (this.sceneManager) {
+      this.sceneManager.setCameraMode(mode);
     }
   }
 
@@ -238,7 +258,7 @@ class ISSTrackerApp {
       this.issMarker.destroy();
     }
 
-    if(this.groundReferenceMarker){
+    if (this.groundReferenceMarker) {
       this.issMarker.dispose();
     }
 

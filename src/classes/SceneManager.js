@@ -12,6 +12,7 @@ import {
   SphereGeometry,
   SRGBColorSpace,
   TextureLoader,
+  Vector3,
   WebGLRenderer,
 } from "three";
 import { OrbitControls, RGBELoader } from "three/addons";
@@ -36,6 +37,10 @@ export class SceneManager {
     this.cameraRadius = CONFIG.SCENE.CAMERA_RADIUS;
     this.issMarker = null; // Référence pour l'animation
     this.clock = new Clock();
+
+    // Camera modes
+    this.cameraMode = "orbit"; // 'orbit', 'follow-iss', 'static'
+    this.followOffset = new Vector3(0, 0, 0); // Offset pour la caméra qui suit l'ISS
 
     this.initialize().then(() => {
       console.log("Scene manager initialized");
@@ -77,7 +82,7 @@ export class SceneManager {
       CONFIG.SCENE.CAMERA_NEAR,
       CONFIG.SCENE.CAMERA_FAR
     );
-    this.camera.position.z = CONFIG.SCENE.CAMERA_INITIAL_Z;
+    // this.camera.position.z = CONFIG.SCENE.CAMERA_INITIAL_Z;
   }
 
   /**
@@ -207,12 +212,8 @@ export class SceneManager {
   updateAnimation() {
     const deltaTime = this.clock.getDelta();
 
-    if (this.rotationEnabled) {
-      this.rotationAngle += CONFIG.SCENE.ROTATION_SPEED;
-      this.camera.position.x = this.cameraRadius * Math.sin(this.rotationAngle);
-      this.camera.position.z = this.cameraRadius * Math.cos(this.rotationAngle);
-      this.camera.lookAt(this.earth.position);
-    }
+    // Mettre à jour la caméra selon le mode sélectionné
+    this.updateCamera(deltaTime);
 
     // Animer le marqueur ISS s'il existe
     if (this.issMarker) {
@@ -225,6 +226,62 @@ export class SceneManager {
 
     if (this.earth) {
       this.earth.cloudsRotation(deltaTime);
+    }
+  }
+
+  /**
+   * Update camera based on current mode
+   */
+  updateCamera(deltaTime) {
+    switch (this.cameraMode) {
+      case "orbit":
+        this.updateOrbitCamera();
+        break;
+      case "follow-iss":
+        this.updateFollowISSCamera();
+        break;
+      case "static":
+        // Ne rien faire, la caméra reste statique
+        break;
+    }
+  }
+
+  /**
+   * Update orbit camera (rotation autour de la Terre)
+   */
+  updateOrbitCamera() {
+    if (this.rotationEnabled) {
+      this.rotationAngle += CONFIG.SCENE.ROTATION_SPEED;
+      this.camera.position.x = this.cameraRadius * Math.sin(this.rotationAngle);
+      this.camera.position.z = this.cameraRadius * Math.cos(this.rotationAngle);
+      this.camera.lookAt(this.earth.position);
+    }
+  }
+
+  /**
+   * Update camera to follow ISS
+   */
+  updateFollowISSCamera() {
+    if (this.issMarker && this.issMarker.getMesh()) {
+        const issPosition = this.issMarker.getMesh().position;
+        const earthCenter = this.earth.earthGroup.position;
+
+        const issDirection = issPosition.clone().sub(earthCenter).normalize();
+
+        const heightOffset = 1;
+        const backwardOffset = 0.3;
+
+        const upVector = issDirection.clone();
+
+        const tangent = new Vector3(-issDirection.z, 0, issDirection.x).normalize();
+
+        const cameraPosition = issPosition.clone()
+            .add(upVector.clone().multiplyScalar(heightOffset))
+            .add(tangent.clone().multiplyScalar(-backwardOffset));
+
+        this.camera.position.lerp(cameraPosition, 0.5);
+        this.camera.lookAt(earthCenter);
+
     }
   }
 
@@ -255,27 +312,36 @@ export class SceneManager {
   }
 
   /**
+   * Set camera mode
+   * @param {string} mode - Camera mode: 'orbit', 'follow-iss', 'static'
+   */
+  setCameraMode(mode) {
+    const validModes = ["orbit", "follow-iss", "static"];
+    if (!validModes.includes(mode)) {
+      console.warn(`Invalid camera mode: ${mode}. Valid modes:`, validModes);
+      return;
+    }
+
+    this.cameraMode = mode;
+
+    // Ajuster les contrôles selon le mode
+    if (this.controls) {
+      if (mode === "follow-iss") {
+        this.controls.enabled = false; // Désactiver les contrôles manuels
+      } else {
+        this.controls.enabled = true; // Réactiver les contrôles manuels
+      }
+    }
+
+    console.log(`Camera mode set to: ${mode}`);
+  }
+
+  /**
    * Get the scene object
    * @returns {Scene} The Three.js scene
    */
   getScene() {
     return this.scene;
-  }
-
-  /**
-   * Get the camera object
-   * @returns {PerspectiveCamera} The camera
-   */
-  getCamera() {
-    return this.camera;
-  }
-
-  /**
-   * Get the renderer object
-   * @returns {WebGLRenderer} The renderer
-   */
-  getRenderer() {
-    return this.renderer;
   }
 
   /**
