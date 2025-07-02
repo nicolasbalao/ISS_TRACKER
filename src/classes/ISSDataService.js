@@ -3,13 +3,9 @@ import {CONFIG} from "../config/config.js";
 /**
  * Service responsible for fetching ISS position data from the API
  */
-export class ISSPositionService {
+export class ISSDataService {
     constructor() {
-        this.currentPosition = {...CONFIG.DEFAULT_POSITION}; // Default position
         this.listeners = [];
-        this.currentAltitude = 0;
-        this.velocityListeners = [];
-        this.altitudeListener = [];
         this.isPolling = false;
     }
 
@@ -17,7 +13,7 @@ export class ISSPositionService {
      * Fetch current ISS position from API
      * @returns {Promise<{lat: number, lon: number}|null>}
      */
-    async fetchCurrentPosition() {
+    async fetchCurrentData() {
         try {
             const response = await fetch(CONFIG.API.ISS_POSITION_URL);
 
@@ -37,11 +33,7 @@ export class ISSPositionService {
             console.log(
                 `[ISS Position] Latitude: ${position.lat}, Longitude: ${position.lon}`
             );
-
-            this.updatePosition(position);
-            this.updateVelocity(velocity);
-            this.updateAltitude(altitude)
-
+            this.updateData({lat: latitude, lon: longitude, velocity, altitude});
 
             return position;
         } catch (error) {
@@ -50,83 +42,31 @@ export class ISSPositionService {
         }
     }
 
-    /**
-     * Update current position and notify listeners
-     * @param {Object} position - The new position {lat, lon}
-     */
-    updatePosition(position) {
-        this.currentPosition = position;
-        this.notifyListeners(position);
-    }
 
-    updateVelocity(velocity) {
-        this.notifyVelocityListeners(velocity);
-    }
-
-    updateAltitude(altitude) {
-        this.currentAltitude = altitude;
-        this.notifyAltitudeListeners(altitude);
+    updateData(data){
+        this.notifyListeners(data);
     }
 
     /**
      * Add a listener for position updates
      * @param {Function} callback - Callback function to be called on position update
      */
-    addPositionListener(callback) {
+    addListener(callback) {
         if (typeof callback === "function") {
             this.listeners.push(callback);
         }
     }
 
-    addVelocityListener(callback) {
-        if (typeof callback === "function") {
-            this.velocityListeners.push(callback);
-        }
-    }
-
-    addAltitudeListener(callback) {
-        if (typeof callback === "function") {
-            this.altitudeListener.push(callback);
-        }
-    }
-    /**
-     * Remove a position listener
-     * @param {Function} callback - Callback function to remove
-     */
-    removePositionListener(callback) {
-        this.listeners = this.listeners.filter((listener) => listener !== callback);
-    }
-
     /**
      * Notify all listeners of position change
-     * @param {Object} position - The updated position
+     * @param {Object} data - The updated data {lat, lon, velocity, altitude}
      */
-    notifyListeners(position) {
+    notifyListeners(data) {
         this.listeners.forEach((listener) => {
             try {
-                listener(position);
+                listener(data);
             } catch (error) {
                 console.error("Error in position listener:", error);
-            }
-        });
-    }
-
-    notifyVelocityListeners(velocity) {
-        this.velocityListeners.forEach((listener) => {
-            try{
-                listener(velocity);
-            } catch (error) {
-                console.error("Error in velocity listener:", error);
-            }
-        })
-    }
-
-    notifyAltitudeListeners(altitude) {
-        this.altitudeListener.forEach((listener) => {
-            try {
-                listener(altitude);
-            } catch (error) {
-                console.error("Error in altitude listener:", error);
             }
         });
     }
@@ -143,11 +83,11 @@ export class ISSPositionService {
         this.isPolling = true;
 
         // Fetch initial position
-        this.fetchCurrentPosition();
+        this.fetchCurrentData();
 
         // Set up interval for periodic updates
         this.pollingInterval = setInterval(() => {
-            this.fetchCurrentPosition();
+            this.fetchCurrentData();
         }, CONFIG.API.POLLING_INTERVAL);
 
         console.log("ISS position polling started");
@@ -163,13 +103,5 @@ export class ISSPositionService {
         }
         this.isPolling = false;
         console.log("ISS position polling stopped");
-    }
-
-    /**
-     * Get current position
-     * @returns {Object} Current ISS position {lat, lon}
-     */
-    getCurrentPosition() {
-        return {...this.currentPosition};
     }
 }

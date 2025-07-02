@@ -96,6 +96,25 @@ export class UIManager {
     console.log(`Camera mode changed to: ${mode}`);
   }
 
+  updateISSInformationUI(data) {
+    if (!data) return;
+
+    const { lat, lon, velocity, altitude } = data;
+
+    // Update latitude and longitude displays
+    debugger;
+    this.updatePositionDisplay({ lat, lon });
+
+    // Update velocity display
+    this.updateVelocityDisplay(velocity);
+
+    // Update altitude display
+    this.updateAltitudeDisplay(altitude);
+
+    // Show success message
+    this.showSuccess("ISS position updated successfully");
+  }
+
   /**
    * Update the ISS position display
    * @param {Object} position - Position object {lat, lon}
@@ -151,6 +170,7 @@ export class UIManager {
    */
   formatCoordinate(value, type) {
     const direction = this.getDirection(value, type);
+    debugger;
     const absoluteValue = Math.abs(value);
     return `${absoluteValue.toFixed(4)}° ${direction}`;
   }
@@ -205,27 +225,6 @@ export class UIManager {
   }
 
 
-
-  /**
-   * Show loading state
-   */
-  showLoading() {
-    this.updateStatusIndicator("Loading ISS position...", "info");
-
-    if (this.elements.coordinatesPanel) {
-      this.elements.coordinatesPanel.classList.add("loading");
-    }
-  }
-
-  /**
-   * Hide loading state
-   */
-  hideLoading() {
-    if (this.elements.coordinatesPanel) {
-      this.elements.coordinatesPanel.classList.remove("loading");
-    }
-  }
-
   /**
    * Show error message
    * @param {string} message - Error message
@@ -251,26 +250,6 @@ export class UIManager {
   on(event, callback) {
     if (typeof callback === "function") {
       this.callbacks[event] = callback;
-    }
-  }
-
-  /**
-   * Unregister callback for UI events
-   * @param {string} event - Event name
-   */
-  off(event) {
-    delete this.callbacks[event];
-  }
-
-  /**
-   * Toggle panel visibility
-   * @param {string} panelName - Panel element key
-   * @param {boolean} visible - Whether panel should be visible
-   */
-  togglePanel(panelName, visible) {
-    const panel = this.elements[panelName];
-    if (panel) {
-      panel.style.display = visible ? "block" : "none";
     }
   }
 

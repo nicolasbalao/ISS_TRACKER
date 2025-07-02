@@ -65,9 +65,11 @@ export const CONFIG = {
     ENABLE_ZOOM: true,
     ENABLE_PAN: false,
   },
-  DEFAULT_POSITION: {
+  DEFAULT_ISS_DATA: {
     lat: 0,
     lon: 0,
+    velocity: 0,
+    altitude: 0,
   }
 };
 

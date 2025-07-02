@@ -1,12 +1,10 @@
 import { SceneManager } from "./classes/SceneManager.js";
-import { ISSPositionService } from "./classes/ISSPositionService.js";
+import { ISSDataService } from "./classes/ISSDataService.js";
 import { ISSMarker } from "./classes/ISSMarker.js";
 import { UIManager } from "./classes/UIManager.js";
 import { GroundReferenceMarker } from "./classes/GroundReferenceMarker.js";
 import { LoadingScreen } from "./classes/LoadingScreen.js";
 import { getAllResources } from "./config/resources.js";
-import { update } from "three/addons/libs/tween.module.js";
-import { Vector3 } from "three";
 
 /**
  * Main application class that coordinates all components
@@ -14,10 +12,9 @@ import { Vector3 } from "three";
 class ISSTrackerApp {
   constructor() {
     this.sceneManager = null;
-    this.positionService = null;
+    this.ISSDataService = null;
     this.issMarker = null;
     this.uiManager = null;
-    this.isInitialized = false;
     this.groundReferenceMarker = null; // For future use
     this.loadingScreen = null;
   }
@@ -60,7 +57,7 @@ class ISSTrackerApp {
         this.loadingScreen.updateResourceStatus(resource.name, "loading");
       });
 
-      resourceLoader.onComplete((resources) => {
+      resourceLoader.onComplete(() => {
         // Update all resources as loaded
         allResources.forEach((resource) => {
           this.loadingScreen.updateResourceStatus(resource.name, "loaded");
@@ -93,7 +90,7 @@ class ISSTrackerApp {
 
       // Initialize position service
       this.loadingScreen.setStatus("Connexion au service de position...");
-      this.positionService = new ISSPositionService();
+      this.ISSDataService = new ISSDataService();
 
       // Setup event handlers
       this.setupEventHandlers();
@@ -102,7 +99,6 @@ class ISSTrackerApp {
       this.loadingScreen.setStatus("Démarrage des services...");
       await this.startServices();
 
-      this.isInitialized = true;
 
       // Hide loading screen with delay for smooth transition
       this.loadingScreen.setStatus("Finalisation...");
@@ -133,21 +129,9 @@ class ISSTrackerApp {
    */
   setupEventHandlers() {
     // Handle position updates from service
-    this.positionService.addPositionListener((position) => {
-      this.handlePositionUpdate(position);
+    this.ISSDataService.addListener((data) => {
+      this.handleISSDataUpdate(data);
     });
-
-    this.positionService.addVelocityListener((velocity) => {
-        if (this.uiManager) {
-            this.uiManager.updateVelocityDisplay(velocity);
-        }
-    });
-
-    this.positionService.addAltitudeListener((altitude) => {
-        if (this.uiManager) {
-            this.uiManager.updateAltitudeDisplay(altitude);
-        }
-    })
 
     // Handle camera mode change
     this.uiManager.on("onCameraModeChange", (mode) => {
@@ -179,30 +163,34 @@ class ISSTrackerApp {
 
   /**
    * Handle position updates
-   * @param {Object} position - New ISS position {lat, lon}
+   * @param {Object} data - New ISS position {lat, lon, velocity, altitude}
    */
-  handlePositionUpdate(position) {
-    if (!position) return;
+  handleISSDataUpdate(data) {
+    if (!data) return;
+
+    const {lat, lon, altitude} = data;
 
     try {
       // Update 3D marker position
-      if (this.issMarker) {
-        this.issMarker.updatePosition(position, this.positionService.currentAltitude);
-      }
+      if(lat && lon){
+        if (this.issMarker) {
+          this.issMarker.updatePosition({lat, lon}, altitude);
+        }
 
-      if (this.groundReferenceMarker) {
-        this.groundReferenceMarker.updatePosition(position);
-        this.groundReferenceMarker.createConnectionLine(
-          this.issMarker.mesh.position
-        );
+        if (this.groundReferenceMarker) {
+          this.groundReferenceMarker.updatePosition(data);
+          this.groundReferenceMarker.createConnectionLine(
+            this.issMarker.mesh.position
+          );
+        }
       }
 
       // Update UI display
       if (this.uiManager) {
-        this.uiManager.updatePositionDisplay(position);
+        this.uiManager.updateISSInformationUI(data);
       }
 
-      console.log(`Position updated: ${position.lat}, ${position.lon}`);
+      console.log(`Position updated: ${data.lat}, ${data.lon}`);
     } catch (error) {
       console.error("Error handling position update:", error);
       if (this.uiManager) {
@@ -211,15 +199,6 @@ class ISSTrackerApp {
     }
   }
 
-  /**
-   * Handle rotation toggle from UI
-   * @param {boolean} enabled - Whether rotation is enabled
-   */
-  handleRotationToggle(enabled) {
-    if (this.sceneManager) {
-      this.sceneManager.setRotationEnabled(enabled);
-    }
-  }
 
   /**
    * Handle camera mode change from UI
@@ -241,16 +220,16 @@ class ISSTrackerApp {
     }
 
     // Fetch initial position
-    if (this.positionService) {
-      const initialPosition = await this.positionService.fetchCurrentPosition();
+    if (this.ISSDataService) {
+      const initialPosition = await this.ISSDataService.fetchCurrentData();
       if (initialPosition) {
-        this.handlePositionUpdate(initialPosition);
+        this.handleISSDataUpdate(initialPosition);
       }
     }
 
     // Start position polling
-    if (this.positionService) {
-      this.positionService.startPolling();
+    if (this.ISSDataService) {
+      this.ISSDataService.startPolling();
     }
   }
 
@@ -258,56 +237,13 @@ class ISSTrackerApp {
    * Stop application services
    */
   stopServices() {
-    if (this.positionService) {
-      this.positionService.stopPolling();
+    if (this.ISSDataService) {
+      this.ISSDataService.stopPolling();
     }
 
     if (this.sceneManager) {
       this.sceneManager.stopAnimation();
     }
-  }
-
-  /**
-   * Get current ISS position
-   * @returns {Object} Current position {lat, lon}
-   */
-  getCurrentPosition() {
-    return this.positionService
-      ? this.positionService.getCurrentPosition()
-      : null;
-  }
-
-  /**
-   * Manually refresh ISS position
-   */
-  async refreshPosition() {
-    if (!this.positionService) return;
-
-    try {
-      this.uiManager?.showLoading();
-      const position = await this.positionService.fetchCurrentPosition();
-
-      if (position) {
-        this.uiManager?.showSuccess("Position updated");
-      } else {
-        this.uiManager?.showError("Failed to fetch position");
-      }
-    } catch (error) {
-      console.error("Error refreshing position:", error);
-      this.uiManager?.showError("Network error");
-    } finally {
-      this.uiManager?.hideLoading();
-    }
-  }
-
-  /**
-   * Toggle between different view modes
-   * @param {string} mode - View mode ('orbit', 'follow', 'fixed')
-   */
-  setViewMode(mode) {
-    // Implementation for different camera modes
-    console.log(`View mode set to: ${mode}`);
-    // This could be extended to support different camera behaviors
   }
 
   /**
@@ -334,24 +270,15 @@ class ISSTrackerApp {
       this.sceneManager.dispose();
     }
 
-    if (this.positionService) {
-      this.positionService.stopPolling();
+    if (this.ISSDataService) {
+      this.ISSDataService.stopPolling();
     }
 
     if (this.uiManager) {
       this.uiManager.dispose();
     }
 
-    this.isInitialized = false;
     console.log("ISS Tracker App disposed");
-  }
-
-  /**
-   * Check if the application is initialized
-   * @returns {boolean} True if initialized
-   */
-  isReady() {
-    return this.isInitialized;
   }
 }
 
