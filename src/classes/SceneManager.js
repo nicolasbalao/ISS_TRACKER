@@ -35,7 +35,7 @@ export class SceneManager {
     this.earth = null;
     this.animationId = null;
     this.rotationAngle = 0;
-    this.cameraRadius = CONFIG.SCENE.CAMERA_RADIUS;
+    this.cameraRadius = window.innerWidth <= 768 ?  CONFIG.SCENE.CAMERA_RADIUS_MOBILE: CONFIG.SCENE.CAMERA_RADIUS;
     this.issMarker = null; // Référence pour l'animation
     this.clock = new Clock();
     this.resourceLoader = new ResourceLoader();
@@ -151,13 +151,13 @@ export class SceneManager {
    */
   createCamera() {
     const aspect = window.innerWidth / window.innerHeight;
+    const cameraFov = window.innerWidth <= 768 ? CONFIG.SCENE.CAMERA_FOV_MOBILE : CONFIG.SCENE.CAMERA_FOV;
     this.camera = new PerspectiveCamera(
-      CONFIG.SCENE.CAMERA_FOV,
-      aspect,
-      CONFIG.SCENE.CAMERA_NEAR,
-      CONFIG.SCENE.CAMERA_FAR
+        cameraFov,
+        aspect,
+        CONFIG.SCENE.CAMERA_NEAR,
+        CONFIG.SCENE.CAMERA_FAR
     );
-    // this.camera.position.z = CONFIG.SCENE.CAMERA_INITIAL_Z;
   }
 
   /**

@@ -13,9 +13,11 @@ export const CONFIG = {
   // 3D Scene Configuration
   SCENE: {
     CAMERA_FOV: 45,
+    CAMERA_FOV_MOBILE: 60,
     CAMERA_NEAR: 0.1,
     CAMERA_FAR: 1000,
     CAMERA_INITIAL_Z: 3.5,
+    CAMERA_RADIUS_MOBILE: 4.5,
     CAMERA_RADIUS: 3.5,
     ROTATION_SPEED: 0.001,
     EARTH_RADIUS: 1,
