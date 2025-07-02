@@ -36,3 +36,8 @@ npm run build
 ```bash
 npm run preview
 ```
+
+### Resources
+- [Three.js Documentation](https://threejs.org/docs/)
+- [ISS API Documentation](https://api.wheretheiss.at/w/developer)
+- [Make Your Own Earth in Three.js](https://franky-arkon-digital.medium.com/make-your-own-earth-in-three-js-8b875e281b1e)

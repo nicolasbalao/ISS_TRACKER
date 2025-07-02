@@ -34,10 +34,15 @@ export class UIManager {
       followISSModeBtn: document.getElementById("follow-iss-mode"),
       staticModeBtn: document.getElementById("static-mode"),
       cameraModeButtons: document.querySelectorAll(".camera-btn"),
+      // Mobile toggle buttons
+      infoToggleBtn: document.getElementById("info-toggle-btn"),
     };
 
     // Validate that required elements exist
     this.validateElements();
+    
+    // Initialize mobile UI state
+    this.initializeMobileUI();
   }
 
   /**
@@ -68,6 +73,18 @@ export class UIManager {
         const mode = event.currentTarget.dataset.mode;
         this.handleCameraModeChange(mode);
       });
+    });
+
+    // Mobile info toggle button
+    if (this.elements.infoToggleBtn) {
+      this.elements.infoToggleBtn.addEventListener("click", () => {
+        this.toggleInfoPanel();
+      });
+    }
+
+    // Handle window resize for responsive behavior
+    window.addEventListener("resize", () => {
+      this.handleResize();
     });
   }
 
@@ -102,7 +119,6 @@ export class UIManager {
     const { lat, lon, velocity, altitude } = data;
 
     // Update latitude and longitude displays
-    debugger;
     this.updatePositionDisplay({ lat, lon });
 
     // Update velocity display
@@ -170,7 +186,6 @@ export class UIManager {
    */
   formatCoordinate(value, type) {
     const direction = this.getDirection(value, type);
-    debugger;
     const absoluteValue = Math.abs(value);
     return `${absoluteValue.toFixed(4)}° ${direction}`;
   }
@@ -263,5 +278,65 @@ export class UIManager {
     this.callbacks = {};
 
     console.log("UI Manager disposed");
+  }
+
+  /**
+   * Initialize mobile UI state and behavior
+   */
+  initializeMobileUI() {
+    this.isMobile = window.innerWidth <= 768;
+    this.infoPanelVisible = !this.isMobile; // Masquer par défaut sur mobile
+    
+    if (this.isMobile && this.elements.coordinatesPanel) {
+      this.elements.coordinatesPanel.classList.toggle("hidden", !this.infoPanelVisible);
+    }
+  }
+
+  /**
+   * Toggle info panel visibility on mobile
+   */
+  toggleInfoPanel() {
+    if (!this.elements.coordinatesPanel || !this.isMobile) return;
+
+    this.infoPanelVisible = !this.infoPanelVisible;
+    this.elements.coordinatesPanel.classList.toggle("hidden", !this.infoPanelVisible);
+
+    // Update toggle button icon
+    if (this.elements.infoToggleBtn) {
+      this.elements.infoToggleBtn.textContent = this.infoPanelVisible ? "❌" : "📊";
+      this.elements.infoToggleBtn.setAttribute(
+        "aria-label", 
+        this.infoPanelVisible ? "Masquer les informations ISS" : "Afficher les informations ISS"
+      );
+    }
+
+    // Provide haptic feedback on mobile devices
+    if ("vibrate" in navigator) {
+      navigator.vibrate(50);
+    }
+  }
+
+  /**
+   * Handle window resize for responsive behavior
+   */
+  handleResize() {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.innerWidth <= 768;
+
+    // Reset panel visibility when switching between mobile/desktop
+    if (wasMobile !== this.isMobile) {
+      if (this.elements.coordinatesPanel) {
+        if (this.isMobile) {
+          this.infoPanelVisible = false;
+          this.elements.coordinatesPanel.classList.add("hidden");
+          if (this.elements.infoToggleBtn) {
+            this.elements.infoToggleBtn.textContent = "📊";
+          }
+        } else {
+          this.infoPanelVisible = true;
+          this.elements.coordinatesPanel.classList.remove("hidden");
+        }
+      }
+    }
   }
 }
