@@ -347,7 +347,7 @@ export class SceneManager {
         .add(upVector.clone().multiplyScalar(heightOffset))
         .add(tangent.clone().multiplyScalar(-backwardOffset));
 
-      this.camera.position.lerp(cameraPosition, 0.5);
+      this.camera.position.lerp(cameraPosition, 0.2);
       this.camera.lookAt(earthCenter);
     }
   }
