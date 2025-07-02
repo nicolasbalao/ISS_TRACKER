@@ -24,6 +24,8 @@ export class UIManager {
     this.elements = {
       latitudeDisplay: document.getElementById("latitude-display"),
       longitudeDisplay: document.getElementById("longitude-display"),
+      velocityDisplay: document.getElementById("velocity-display"),
+      altitudeDisplay: document.getElementById("altitude-display"),
       statusIndicator: document.getElementById("status-indicator"),
       coordinatesPanel: document.getElementById("coordinates-panel"),
       controlsPanel: document.getElementById("controls-panel"),
@@ -67,18 +69,6 @@ export class UIManager {
         this.handleCameraModeChange(mode);
       });
     });
-  }
-
-  /**
-   * Handle rotation toggle change
-   * @param {boolean} isEnabled - Whether rotation is enabled
-   */
-  handleRotationToggle(isEnabled) {
-
-    this.updateStatusIndicator(
-      isEnabled ? "Rotation Enabled" : "Rotation Disabled"
-    );
-    console.log(`Rotation toggled: ${isEnabled}`);
   }
 
   /**
@@ -128,6 +118,28 @@ export class UIManager {
     }
 
     // Add visual feedback for position update
+    this.highlightCoordinatesPanel();
+  }
+
+  updateVelocityDisplay(velocity) {
+    if (!velocity || !this.elements.velocityDisplay) return;
+
+    // Format velocity to 2 decimal places
+    const formattedVelocity = velocity.toFixed(2);
+    this.elements.velocityDisplay.textContent = `${formattedVelocity} km/h`;
+
+    // Add visual feedback for velocity update
+    this.highlightCoordinatesPanel();
+  }
+  
+  updateAltitudeDisplay(altitude) {
+    if (!altitude || !this.elements.velocityDisplay) return;
+
+    // Format velocity to 2 decimal places
+    const formattedVelocity = altitude.toFixed(2);
+    this.elements.altitudeDisplay.textContent = `${formattedVelocity} km`;
+
+    // Add visual feedback for velocity update
     this.highlightCoordinatesPanel();
   }
 

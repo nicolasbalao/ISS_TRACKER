@@ -47,7 +47,7 @@ export class GroundReferenceMarker {
 
         const surfaceHeight  = CONFIG.SCENE.EARTH_RADIUS + CONFIG.SCENE.ISS_GROUND_REFERENCE.HEIGHT_OFFSET;
 
-        const vector3Position =  MathUtils.convertLatLonToVector3D(position.lat, position.lon, surfaceHeight);
+        const vector3Position =  MathUtils.convertLatLonAltToVector3D(position.lat, position.lon, 0, surfaceHeight);
         this.marker.position.copy(vector3Position);
     }
 

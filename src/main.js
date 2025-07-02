@@ -54,8 +54,6 @@ class ISSTrackerApp {
       // Start scene initialization
       await this.sceneManager.startInitialization();
 
-
-
       // Track individual resource loading based on centralized config
       const allResources = getAllResources();
       allResources.forEach((resource) => {
@@ -139,10 +137,17 @@ class ISSTrackerApp {
       this.handlePositionUpdate(position);
     });
 
-    // Handle UI rotation toggle
-    this.uiManager.on("onRotationToggle", (enabled) => {
-      this.handleRotationToggle(enabled);
+    this.positionService.addVelocityListener((velocity) => {
+        if (this.uiManager) {
+            this.uiManager.updateVelocityDisplay(velocity);
+        }
     });
+
+    this.positionService.addAltitudeListener((altitude) => {
+        if (this.uiManager) {
+            this.uiManager.updateAltitudeDisplay(altitude);
+        }
+    })
 
     // Handle camera mode change
     this.uiManager.on("onCameraModeChange", (mode) => {
@@ -182,7 +187,7 @@ class ISSTrackerApp {
     try {
       // Update 3D marker position
       if (this.issMarker) {
-        this.issMarker.updatePosition(position);
+        this.issMarker.updatePosition(position, this.positionService.currentAltitude);
       }
 
       if (this.groundReferenceMarker) {

@@ -7,6 +7,9 @@ export class ISSPositionService {
     constructor() {
         this.currentPosition = {...CONFIG.DEFAULT_POSITION}; // Default position
         this.listeners = [];
+        this.currentAltitude = 0;
+        this.velocityListeners = [];
+        this.altitudeListener = [];
         this.isPolling = false;
     }
 
@@ -22,7 +25,8 @@ export class ISSPositionService {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const {latitude, longitude} = await response.json();
+            const {latitude, longitude, velocity, altitude} = await response.json();
+
 
             const position = {
                 lat: parseFloat(latitude),
@@ -33,7 +37,11 @@ export class ISSPositionService {
             console.log(
                 `[ISS Position] Latitude: ${position.lat}, Longitude: ${position.lon}`
             );
+
             this.updatePosition(position);
+            this.updateVelocity(velocity);
+            this.updateAltitude(altitude)
+
 
             return position;
         } catch (error) {
@@ -51,6 +59,15 @@ export class ISSPositionService {
         this.notifyListeners(position);
     }
 
+    updateVelocity(velocity) {
+        this.notifyVelocityListeners(velocity);
+    }
+
+    updateAltitude(altitude) {
+        this.currentAltitude = altitude;
+        this.notifyAltitudeListeners(altitude);
+    }
+
     /**
      * Add a listener for position updates
      * @param {Function} callback - Callback function to be called on position update
@@ -61,6 +78,17 @@ export class ISSPositionService {
         }
     }
 
+    addVelocityListener(callback) {
+        if (typeof callback === "function") {
+            this.velocityListeners.push(callback);
+        }
+    }
+
+    addAltitudeListener(callback) {
+        if (typeof callback === "function") {
+            this.altitudeListener.push(callback);
+        }
+    }
     /**
      * Remove a position listener
      * @param {Function} callback - Callback function to remove
@@ -79,6 +107,26 @@ export class ISSPositionService {
                 listener(position);
             } catch (error) {
                 console.error("Error in position listener:", error);
+            }
+        });
+    }
+
+    notifyVelocityListeners(velocity) {
+        this.velocityListeners.forEach((listener) => {
+            try{
+                listener(velocity);
+            } catch (error) {
+                console.error("Error in velocity listener:", error);
+            }
+        })
+    }
+
+    notifyAltitudeListeners(altitude) {
+        this.altitudeListener.forEach((listener) => {
+            try {
+                listener(altitude);
+            } catch (error) {
+                console.error("Error in altitude listener:", error);
             }
         });
     }

@@ -139,7 +139,7 @@ export class ISSMarker {
    * Update the marker position based on latitude and longitude
    * @param {Object} position - Position object {lat, lon}
    */
-  updatePosition(position) {
+  updatePosition(position, alt) {
     if (
       !position ||
       !MathUtils.isValidLatitude(position.lat) ||
@@ -151,9 +151,10 @@ export class ISSMarker {
 
     this.currentPosition = { ...position };
 
-    const vector3Position = MathUtils.convertLatLonToVector3D(
+    const vector3Position = MathUtils.convertLatLonAltToVector3D(
       position.lat,
       position.lon,
+      alt,
       CONFIG.SCENE.ISS_ORBIT_HEIGHT
     );
 
