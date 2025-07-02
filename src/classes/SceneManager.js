@@ -43,7 +43,6 @@ export class SceneManager {
 
     // Camera modes
     this.cameraMode = "orbit"; // 'orbit', 'follow-iss', 'static'
-    this.followOffset = new Vector3(0, 0, 0); // Offset pour la caméra qui suit l'ISS
 
     // Loading state
     this.isResourcesLoaded = false;
@@ -66,7 +65,7 @@ export class SceneManager {
     this.pmremGenerator.compileEquirectangularShader();
 
     // Define all resources to load using centralized configuration
-    const resources = getAllResources(false); // Exclude optional resources for now
+    const resources = getAllResources(); // Exclude optional resources for now
 
     // Setup resource loader
     this.resourceLoader.defineResources(resources);

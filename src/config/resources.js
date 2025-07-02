@@ -13,13 +13,6 @@ export const RESOURCE_CONFIG = {
       url: "./HDR_white_local_star.hdr",
       description: "Environnement HDR principal",
     },
-    {
-      name: "hdr_planet",
-      type: "hdr",
-      url: "./HDR_artificial_planet.hdr",
-      description: "Environnement HDR planète artificielle",
-      optional: true, // Optional resource - won't block loading if failed
-    },
   ],
 
   // Textures
@@ -27,7 +20,8 @@ export const RESOURCE_CONFIG = {
     {
       name: "earth_diffuse",
       type: "texture",
-      url: "./ISS_TRACKER/earth.jpg",
+      // url: "./earth.jpg",
+      url: "./8k_earth_daymap.jpg",
       description: "Texture de la Terre",
       options: {
         colorSpace: SRGBColorSpace,
@@ -42,7 +36,8 @@ export const RESOURCE_CONFIG = {
     {
       name: "clouds_alpha",
       type: "texture",
-      url: "./Clouds.png",
+      // url: "./Clouds.png",
+      url: "./8k_earth_clouds.jpg",
       description: "Texture des nuages",
     },
     {
@@ -67,39 +62,27 @@ export const RESOURCE_CONFIG = {
 
 /**
  * Get all resources as a flat array
- * @param {boolean} includeOptional - Whether to include optional resources
  * @returns {Array} Array of resource definitions
  */
-export function getAllResources(includeOptional = true) {
+export function getAllResources() {
   const resources = [];
 
   // Add HDR resources
   resources.push(
-    ...RESOURCE_CONFIG.HDR.filter((r) => includeOptional || !r.optional)
+    ...RESOURCE_CONFIG.HDR,
   );
 
   // Add texture resources
   resources.push(
-    ...RESOURCE_CONFIG.TEXTURES.filter((r) => includeOptional || !r.optional)
+    ...RESOURCE_CONFIG.TEXTURES,
   );
 
   // Add model resources
   resources.push(
-    ...RESOURCE_CONFIG.MODELS.filter((r) => includeOptional || !r.optional)
+    ...RESOURCE_CONFIG.MODELS,
   );
 
   return resources;
-}
-
-/**
- * Get resources by category
- * @param {string} category - Resource category ('HDR', 'TEXTURES', 'MODELS')
- * @param {boolean} includeOptional - Whether to include optional resources
- * @returns {Array} Array of resource definitions
- */
-export function getResourcesByCategory(category, includeOptional = true) {
-  const categoryResources = RESOURCE_CONFIG[category] || [];
-  return categoryResources.filter((r) => includeOptional || !r.optional);
 }
 
 /**

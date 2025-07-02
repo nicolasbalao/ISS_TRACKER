@@ -57,7 +57,7 @@ class ISSTrackerApp {
 
 
       // Track individual resource loading based on centralized config
-      const allResources = getAllResources(false);
+      const allResources = getAllResources();
       allResources.forEach((resource) => {
         this.loadingScreen.updateResourceStatus(resource.name, "loading");
       });
