@@ -84,9 +84,7 @@ export class ResourceLoader {
     console.log(`Starting to load ${this.totalResources} resources...`);
 
     // Load all resources in parallel
-    const loadPromises = this.resourceList.map((resource) =>
-      this.loadResource(resource)
-    );
+    const loadPromises = this.resourceList.map((resource) => this.loadResource(resource));
 
     try {
       await Promise.all(loadPromises);
@@ -154,7 +152,7 @@ export class ResourceLoader {
 
     return new Promise((resolve, reject) => {
       this.textureLoader.load(
-        earth,
+        url,
         (texture) => {
           // Apply options to texture
           if (options.colorSpace) {
